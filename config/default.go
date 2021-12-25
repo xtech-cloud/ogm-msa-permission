@@ -3,7 +3,7 @@ package config
 const defaultYAML string = `
 service:
     name: xtc.ogm.permission
-    address: :18899
+    address: :18812
     ttl: 15
     interval: 10
 logger:

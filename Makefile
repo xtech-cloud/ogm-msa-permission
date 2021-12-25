@@ -1,6 +1,7 @@
 BUILD_VERSION   := $(shell git tag --contains)
 BUILD_TIME      := $(shell date "+%F %T")
 COMMIT_SHA1     := $(shell git rev-parse HEAD )
+scope := $(shell cat /tmp/permission-scope)
 
 .PHONY: build
 build:
@@ -27,6 +28,25 @@ clean:
 .PHONY: call
 call:
 	gomu --registry=etcd --client=grpc call xtc.ogm.permission Healthy.Echo '{"msg":"hello"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Create '{"key":"test.1", "name":"test-1"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Create '{"key":"test.1", "name":"test-2"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Create '{"key":"test.2", "name":"test-1"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Create '{"key":"test.2", "name":"test-2"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.List '{"offset":0, "count":50}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.List '{"offset":0, "count":1}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.List '{"offset":1, "count":1}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Search '{"offset":0, "count":50, "key":"test"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Search '{"offset":0, "count":50, "key":"st."}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Search '{"offset":0, "count":50, "key":".1"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Search '{"offset":0, "count":50, "name":"test"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Search '{"offset":0, "count":50, "name":"st-"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Search '{"offset":0, "count":50, "name":"-1"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Scope.Search '{"offset":0, "count":50, "key":"1", "name":"1"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Rule.Add '{"scope":"${scope}", "key":"111", "name":"aaaaa", "state":1}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Rule.Add '{"scope":"${scope}", "key":"123", "name":"bbb", "state":1}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Rule.List '{"scope":"${scope}", "offset":0, "count":50}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Rule.Search '{"scope":"${scope}", "offset":0, "count":50, "key":"1"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Rule.Search '{"scope":"${scope}", "offset":0, "count":50, "key":"2"}'
 
 .PHONY: post
 post:

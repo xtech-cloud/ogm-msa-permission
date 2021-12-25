@@ -38,9 +38,7 @@ func main() {
 
 	// Register Handler
 	proto.RegisterHealthyHandler(service.Server(), new(handler.Healthy))
-
 	proto.RegisterRuleHandler(service.Server(), new(handler.Rule))
-
 	proto.RegisterScopeHandler(service.Server(), new(handler.Scope))
 
 
