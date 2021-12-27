@@ -15,7 +15,7 @@ type Rule struct {
 }
 
 func (Rule) TableName() string {
-	return "ogm_permission_Rule"
+	return "ogm_permission_rule"
 }
 
 type RuleDAO struct {
@@ -72,13 +72,13 @@ func (this *RuleDAO) Search(_offset int64, _count int64, _scope string, _key str
 	db := this.conn.DB.Model(&Rule{})
 	db = db.Where("scope = ?", _scope)
 	if "" != _key {
-		db = db.Where("key LIKE ?", "%"+_key+"%")
+		db = db.Where("`key` LIKE ?", "%"+_key+"%")
 	}
 	if "" != _name {
-		db = db.Where("name LIKE ?", "%"+_name+"%")
+		db = db.Where("`name` LIKE ?", "%"+_name+"%")
 	}
 	if 0 != _state {
-		db = db.Where("state = ?", _state)
+		db = db.Where("`state` = ?", _state)
 	}
 	if err := db.Count(&count).Error; nil != err {
 		return 0, nil, err

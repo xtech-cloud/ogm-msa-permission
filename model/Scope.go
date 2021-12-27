@@ -13,7 +13,7 @@ type Scope struct {
 }
 
 func (Scope) TableName() string {
-	return "ogm_permission_Scope"
+	return "ogm_permission_scope"
 }
 
 type ScopeDAO struct {
@@ -68,10 +68,10 @@ func (this *ScopeDAO) Search(_offset int64, _count int64, _key string, _name str
 	count := int64(0)
 	db := this.conn.DB.Model(&Scope{})
 	if _key != "" {
-		db = db.Where("key LIKE  ?", "%"+_key+"%")
+		db = db.Where("`key` LIKE  ?", "%"+_key+"%")
 	}
 	if _name != "" {
-		db = db.Where("name LIKE  ?", "%"+_name+"%")
+		db = db.Where("`name` LIKE  ?", "%"+_name+"%")
 	}
 	if err := db.Count(&count).Error; nil != err {
 		return 0, nil, err
