@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"ogm-permission/model"
 
 	"github.com/asim/go-micro/v3/logger"
@@ -36,7 +37,7 @@ func (this *Rule) Add(_ctx context.Context, _req *proto.RuleAddRequest, _rsp *pr
 
 	rule := &model.Rule{
 		UUID:  model.ToUUID(_req.Scope + _req.Key),
-        Scope: _req.Scope,
+		Scope: _req.Scope,
 		Key:   _req.Key,
 		Name:  _req.Name,
 		State: _req.State,
@@ -224,6 +225,88 @@ func (this *Rule) Search(_ctx context.Context, _req *proto.RuleSearchRequest, _r
 			Scope: e.Scope,
 			State: e.State,
 		}
+	}
+
+	return nil
+}
+
+func (this *Rule) Export(_ctx context.Context, _req *proto.RuleExportRequest, _rsp *proto.RuleExportResponse) error {
+	logger.Infof("Received Rule.Export, req is %v", _req)
+	_rsp.Status = &proto.Status{}
+
+	if "" == _req.Scope {
+		_rsp.Status.Code = 1
+		_rsp.Status.Message = "scope is required"
+		return nil
+	}
+
+	int_max := int64(^uint64(0) >> 1)
+	dao := model.NewRuleDAO(nil)
+	_, rules, err := dao.List(0, int_max, _req.Scope)
+	if nil != err {
+		_rsp.Status.Code = -1
+		_rsp.Status.Message = err.Error()
+		return nil
+	}
+
+	bytes, err := json.Marshal(rules)
+	if nil != err {
+		_rsp.Status.Code = -1
+		_rsp.Status.Message = err.Error()
+		return nil
+	}
+
+	_rsp.Dump = model.ToBase64(bytes)
+	return nil
+}
+
+func (this *Rule) Import(_ctx context.Context, _req *proto.RuleImportRequest, _rsp *proto.RuleImportResponse) error {
+	logger.Infof("Received Rule.Import, req is %v", _req)
+	_rsp.Status = &proto.Status{}
+
+	if "" == _req.Scope {
+		_rsp.Status.Code = 1
+		_rsp.Status.Message = "scope is required"
+		return nil
+	}
+
+	if "" == _req.Dump {
+		_rsp.Status.Code = 1
+		_rsp.Status.Message = "dump is required"
+		return nil
+	}
+
+	dump, err := model.FromBase64(_req.Dump)
+	if nil != err {
+		_rsp.Status.Code = -1
+		_rsp.Status.Message = err.Error()
+		return nil
+	}
+
+	rules := make([]model.Rule, 0)
+	err = json.Unmarshal(dump, &rules)
+	if nil != err {
+		_rsp.Status.Code = -1
+		_rsp.Status.Message = err.Error()
+		return nil
+	}
+
+	dao := model.NewRuleDAO(nil)
+	_rsp.Failure = make([]string, 0)
+	for _, e := range rules {
+		rule := &model.Rule{
+			UUID:  model.ToUUID(_req.Scope + e.Key),
+			Scope: _req.Scope,
+			Key:   e.Key,
+			Name:  e.Name,
+			State: e.State,
+		}
+
+		err := dao.Insert(rule)
+		if nil != err {
+			_rsp.Failure = append(_rsp.Failure, e.Key)
+		}
+
 	}
 
 	return nil

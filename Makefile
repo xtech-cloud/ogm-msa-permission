@@ -47,6 +47,7 @@ call:
 	gomu --registry=etcd --client=grpc call xtc.ogm.permission Rule.List '{"scope":"${scope}", "offset":0, "count":50}'
 	gomu --registry=etcd --client=grpc call xtc.ogm.permission Rule.Search '{"scope":"${scope}", "offset":0, "count":50, "key":"1"}'
 	gomu --registry=etcd --client=grpc call xtc.ogm.permission Rule.Search '{"scope":"${scope}", "offset":0, "count":50, "key":"2"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.permission Rule.Export '{"scope":"${scope}"}'
 
 .PHONY: post
 post:

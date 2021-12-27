@@ -100,3 +100,7 @@ func ToBase64(_content []byte) string {
 	return base64Coder.EncodeToString(_content)
 }
 
+func FromBase64(_content string) ([]byte, error){
+	return base64Coder.DecodeString(_content)
+}
+
